@@ -157,4 +157,29 @@ public class UserService implements DemoConstant {
     public LoginTicket findLoginTicket(String ticket) {
         return loginTicketMapper.seleceByTicket(ticket);
     }
+
+    public int updateHeader(int userId, String headerUrl) {
+        return userMapper.updateHeader(userId, headerUrl);
+    }
+
+    public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
+        Map<String, Object> map = new HashMap<>();
+        User user = userMapper.selectById(userId);
+        if (StringUtils.isBlank(oldPassword)) {
+            map.put("oldPasswordMsg", "原密码不能为空！");
+            return map;
+        }
+        if (StringUtils.isBlank(newPassword)) {
+            map.put("newPasswordMsg", "新密码不能为空！");
+            return map;
+        }
+        if (!user.getPassword().equals(DemoUtil.md5(oldPassword + user.getSalt()))) {
+            map.put("oldPasswordMsg", "密码不正确！");
+            return map;
+        }
+        userMapper.updatePassword(userId, DemoUtil.md5(newPassword + user.getSalt()));
+
+        return map;
+    }
+
 }
