@@ -162,6 +162,38 @@ public class UserService implements DemoConstant {
         return userMapper.updateHeader(userId, headerUrl);
     }
 
+    public User findUserByName(String username) {
+        return userMapper.selectByName(username);
+    }
+
+    // 重置密码
+    public Map<String, Object> resetPassword(String email, String password) {
+        Map<String, Object> map = new HashMap<>();
+
+        // 空值处理
+        if (StringUtils.isBlank(email)) {
+            map.put("emailMsg", "邮箱不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(password)) {
+            map.put("passwordMsg", "密码不能为空!");
+            return map;
+        }
+
+        // 验证邮箱
+        User user = userMapper.selectByEmail(email);
+        if (user == null) {
+            map.put("emailMsg", "该邮箱尚未注册!");
+            return map;
+        }
+
+        // 重置密码
+        userMapper.updatePassword(user.getId(), DemoUtil.md5(password + user.getSalt()));
+
+        map.put("user", user);
+        return map;
+    }
+
     public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
         Map<String, Object> map = new HashMap<>();
         User user = userMapper.selectById(userId);
