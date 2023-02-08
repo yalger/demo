@@ -150,10 +150,10 @@ public class LoginController implements DemoConstant {
 
     // 获取验证码
     @RequestMapping(path = "/forget/code", method = RequestMethod.GET)
-    public String getForgetCode(String email, Model model, HttpSession session) {
+    @ResponseBody
+    public String getForgetCode(String email, HttpSession session) {
         if (StringUtils.isBlank(email)) {
-            model.addAttribute("emailMsg", "邮箱不能为空！");
-            return "/site/forget";
+            return DemoUtil.getJSONString(1, "邮箱不能为空！");
         }
 
         Context context = new Context();
@@ -164,7 +164,7 @@ public class LoginController implements DemoConstant {
         mailClient.sendMail(email, "找回密码", content);
 
         session.setAttribute("verifyCode", code);
-        return "/site/forget";
+        return DemoUtil.getJSONString(0);
     }
 
     // 重置密码
