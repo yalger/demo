@@ -142,4 +142,12 @@ public class MessageController {
         return DemoUtil.getJSONString(0);
     }
 
+    // 删除私信
+    @RequestMapping(path = "/letter/delete", method = RequestMethod.POST)
+    @ResponseBody
+    public String deleteLetter(int id) {
+        messageService.deleteMessage(id);
+        return DemoUtil.getJSONString(0);
+    }
+
 }
