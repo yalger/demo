@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.Event;
 import com.example.demo.entity.Page;
 import com.example.demo.entity.User;
+import com.example.demo.event.EventProducer;
 import com.example.demo.service.FollowService;
 import com.example.demo.service.UserService;
 import com.example.demo.util.DemoConstant;
@@ -30,12 +32,24 @@ public class FollowController implements DemoConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
     @ResponseBody
     public String follow(int entityType, int entityId) {
         User user = hostHolder.getUser();
 
         followService.follow(user.getId(), entityType, entityId);
+
+        // 触发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
 
         return DemoUtil.getJSONString(0, "已关注！");
     }
