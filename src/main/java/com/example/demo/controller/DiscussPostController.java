@@ -1,9 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Comment;
-import com.example.demo.entity.DiscussPost;
-import com.example.demo.entity.Page;
-import com.example.demo.entity.User;
+import com.example.demo.entity.*;
+import com.example.demo.event.EventProducer;
 import com.example.demo.service.CommentService;
 import com.example.demo.service.DiscussPostService;
 import com.example.demo.service.LikeService;
@@ -40,6 +38,9 @@ public class DiscussPostController implements DemoConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(String title, String content) {
@@ -53,6 +54,14 @@ public class DiscussPostController implements DemoConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+
+        // 触发发帖事件
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
 
         return DemoUtil.getJSONString(0, "发布成功！");
     }
